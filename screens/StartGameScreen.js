@@ -1,20 +1,88 @@
-import React from 'react';
-import {View, Text, TextInput, Button, StyleSheet} from 'react-native';
-import Card from '../components/Card';
+import React, {useState} from 'react';
+import {View, Text, TextInput, Button, StyleSheet, TouchableWithoutFeedback, Keyboard, Alert} from 'react-native';
+import SelectedCard from '../components/SelectedCard';
+import CustomButton from '../components/CustomButton';
+import Colors from '../constants/Colors';
+import Input from '../components/Input';
+import NumberCard from '../components/NumberCard';
 
 const StartGameScreen = props => {
+    const [inputValue, setInputValue] = useState('');
+    const [selectedNumber, setSelectedNumber] = useState();
+    const [isConfirmed, setIsConfirmed] = useState(false);
+
+    const inputChangeHandler = input => {
+        setInputValue(input.replace(/[^0-9]/g, ''));
+    }
+
+    const inputResetHandler = () => {
+        setInputValue('');
+    };
+
+    const inputConfirmeHandler = () => {
+        const chekedNumber = parseInt(inputValue);
+        
+        if (isNaN(chekedNumber) || 
+            chekedNumber == undefined || //Check is value undefined or null 
+            chekedNumber <= 0 || 
+            chekedNumber > 99) 
+        {
+            Alert.alert('Wrong number',
+                        'Number should be between 1 and 99', 
+                        [{text: 'OK', style: 'destructive', onPress: inputResetHandler}])
+            return;
+        }
+
+        setSelectedNumber(chekedNumber);
+        setIsConfirmed(true);
+        setInputValue('');
+
+        Keyboard.dismiss();
+    }
+
+    const newGameHanler = () => {
+        props.onNewGamePress(selectedNumber)
+    };
+
+    let gameStartContainer;
+
+    if (isConfirmed) {
+        gameStartContainer = (
+            <NumberCard title="Selected number" number={selectedNumber}>
+                <CustomButton
+                    title="NEW GAME"
+                    onPress={newGameHanler}
+                    style={styles.gameStartButton}
+                    color={Colors.green}
+                />
+            </NumberCard>
+            )
+    }
+
     return (
-        <View style={styles.screen}>
-            <Text style={styles.title}>Start a New Game!</Text>
-            <Card style={styles.inputContainer}>
-                <Text>Select a Number</Text>
-                <TextInput style={styles.input} placeholder="Input selected number" />
-                <View style={styles.buttonContainer}>
-                    <Button title="Reset" onPress={() => {}} />
-                    <Button title="Confirm" onPress={() => {}} />
-                </View>
-            </Card>
-        </View>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.screen}>
+                <Text style={styles.title}>Start a New Game!</Text>
+                <SelectedCard style={styles.inputContainer}>
+                    <Text>Select a Number</Text>
+                    <Input 
+                        style={styles.input} 
+                        maxLength={2} 
+                        keyboardType="number-pad" 
+                        autoCompleteType="off"
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        onChangeText={inputChangeHandler}
+                        value={inputValue}
+                    />
+                    <View style={styles.buttonContainer}>
+                        <CustomButton title="Reset" color={Colors.red} onPress={inputResetHandler} />
+                        <CustomButton title="Confirm" color={Colors.green} onPress={inputConfirmeHandler} />
+                    </View>
+                </SelectedCard>
+                {gameStartContainer}
+            </View>
+        </TouchableWithoutFeedback>
     );
 };
 
@@ -34,18 +102,19 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     input: {
-        width: '90%',
+        width: 50,
         marginVertical: 10,
-        padding: 5,
-        borderColor: '#eee',
-        borderWidth: 1
+        textAlign: 'center'
     },
     buttonContainer: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'space-around',
         alignItems: 'center',
-        width: '80%',
-        paddingHorizontal: 10
+        width: '100%',
+        paddingHorizontal: 15
+    },
+    gameStartButton: {
+        width: 150
     }
 });
 
