@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 
-const Card = props => (
+const SelectedCard = props => (
     <View style={{...styles.cardContainer, ...props.style}}>
         {props.children}
     </View>
@@ -24,4 +24,4 @@ const styles = StyleSheet.create({
     }
 });
 
-export default Card;
+export default SelectedCard;
